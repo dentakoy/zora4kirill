@@ -752,7 +752,8 @@ def main():
 
         modules = []
         for action, (min_cnt, max_cnt) in MODULES.items():
-            modules.extend([action for _ in range(random.randint(min_cnt, max_cnt))])
+            #modules.extend([action for _ in range(random.randint(min_cnt, max_cnt))])
+            modules.append(action)
         modules = [m.capitalize() for m in modules]
 
         random.shuffle(modules)
@@ -855,39 +856,63 @@ def main():
                         auto_bridged_cnt += 1
                     stats[address]['Admin Mint'] += 1
 
-                else:
+                else: # иначе выполнить модуль 'Mint'
 
                     possible_mints = copy.deepcopy(mints)
                     random.shuffle(possible_mints)
+
+                    possible_mints = random.choices(
+                        possible_mints, k=random.randint(
+                            MODULES[module.lower()][0],
+                            MODULES[module.lower()][1]))
+                    
                     was_minted = False
 
+                    # выполнять цикл пока в списке есть "возможные" (possible) нфт
                     while len(possible_mints) != 0:
 
+                        # извлечь нфт из списка "возможных" (удалив его из списка)
                         nft = possible_mints.pop(0)
+
+                        # продолжить цикл, если извлечённая нфт имеется в списке minted_in_run
                         if nft in minted_in_run:
                             continue
 
-                        minted_in_run.add(nft)
+                        # добавить извлечённую нфт в список minted_in_run
+                        #minted_in_run.add(nft)
 
+                        # сминтить её получив статус и "забриджено"
                         status, bridged = runner.mint(nft)
+
+                        # если "забриджено", то увеличить счетчик auto_bridged_cnt на 1
                         if bridged:
                             auto_bridged_cnt += 1
+
+                        # продолжить цикл, если статус ALREADY (уже сминчено)
                         if status == Status.ALREADY:
                             logger.print(f'{module}: Already minted, trying another one', color='yellow')
                             continue
 
+                        # увеличить на 1 счётчик сминченных нфт в статистике текущего аккаунта (аккаунта) 
                         mint_chain = nft[0]
                         stats[address][mint_chain] += 1
+
+                        # установить переменную was_minted в истину
                         was_minted = True
 
-                        break
+                        # прервать цикл (выйти из цикла)
+                        #break
 
+                    # установить nothing_minted True, если was_minted не равен True
                     if not was_minted:
                         logger.print(f'{module}: Every NFT from the list was already minted', color='yellow')
                         nothing_minted = True
 
+                # вывеcти 'success', если модуль был не 'Mint' или если nothing_minted не равен True
                 if module != 'Mint' or not nothing_minted:
                     logger.print(f'{module}: Success', color='green')
+
+                
                 wait_next_tx()
 
             except Exception as e:

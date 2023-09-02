@@ -861,10 +861,9 @@ def main():
                     possible_mints = copy.deepcopy(mints)
                     random.shuffle(possible_mints)
 
-                    possible_mints = random.choices(
-                        possible_mints, k=random.randint(
-                            MODULES[module.lower()][0],
-                            MODULES[module.lower()][1]))
+                    possible_mints = possible_mints[:
+                        :random.randint(MODULES[module.lower()][0],
+                                        MODULES[module.lower()][1])]
                     
                     was_minted = False
 

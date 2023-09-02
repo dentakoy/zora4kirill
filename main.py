@@ -862,7 +862,7 @@ def main():
                     random.shuffle(possible_mints)
 
                     possible_mints = possible_mints[:
-                        :random.randint(MODULES[module.lower()][0],
+                        random.randint(MODULES[module.lower()][0],
                                         MODULES[module.lower()][1])]
                     
                     was_minted = False
